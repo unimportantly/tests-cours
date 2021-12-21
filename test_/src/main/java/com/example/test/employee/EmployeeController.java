@@ -1,6 +1,7 @@
 package com.example.test.employee;
 
 import com.example.test.employee.dto.EmployeeDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @CrossOrigin
-@RequestMapping("employees")
+@RequestMapping("/employees")
 public class EmployeeController {
 
     private EmployeeService employeeService;
@@ -36,7 +37,7 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<EmployeeDTO> save(@RequestBody EmployeeDTO employeeDTO){
-        return ResponseEntity.ok(this.employeeService.save(employeeDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.employeeService.save(employeeDTO));
     }
 
     @PutMapping

@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public class EmployeeService {
 
+    // declaring the instance variables
     private EmployeeRepository employeeRepository;
     private ModelMapper modelMapper;
 
