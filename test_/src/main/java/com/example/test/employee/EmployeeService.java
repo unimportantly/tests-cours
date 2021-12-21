@@ -2,8 +2,8 @@ package com.example.test.employee;
 
 import com.example.test.employee.dto.EmployeeDTO;
 import org.modelmapper.ModelMapper;
-import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -22,8 +22,11 @@ public class EmployeeService {
      * returns a list of employees
      * @return List<Employee>
      */
-    public List<Employee> findAll(){
-        return this.employeeRepository.findAll();
+    public List<EmployeeDTO> findAll(){
+        List<EmployeeDTO> employeeDTOList = new ArrayList<>();
+        this.employeeRepository.findAll().forEach(employee ->
+            employeeDTOList.add(modelMapper.map(employee, EmployeeDTO.class)));
+        return employeeDTOList;
     }
 
     /**
