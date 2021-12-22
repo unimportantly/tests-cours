@@ -33,12 +33,21 @@ import java.util.Optional;
 @WebMvcTest(controllers = EmployeeController.class)
 public class EmployeeControllerTest {
 
+    /*
+    simulate a component (a request for instance)
+     */
     @Autowired
     private MockMvc mockMvc;
 
+    /*
+    create a fake service
+     */
     @MockBean
     private EmployeeService employeeService;
 
+    /*
+    these 2 methods create an employee for testing purposes
+     */
     private EmployeeDTO employeeDTO(){
         return new EmployeeDTO(1L, "jean", "email@email.com", new Date(), 1, 125f);
     }
@@ -57,7 +66,7 @@ public class EmployeeControllerTest {
     public void testFindAllEmployees2() throws Exception {
         this.mockMvc.perform(get("/employees"))
                 .andExpect(status().isOk())
-//                .andExpect(jsonPath("$")).isEmpty();
+                .andExpect(jsonPath("$").isEmpty()); // -> here we check if the list is empty?
         ;
     }
 
@@ -73,6 +82,10 @@ public class EmployeeControllerTest {
                 .andExpect(status().isCreated()); //mocked the creation of an employee
     }
 
+    /**
+     * this is expected not to work & return a 404 error
+     * @throws Exception
+     */
     @Test
     public void testFindOneEmployeeWhereWrongIdOrInexistantEmployee() throws Exception{
         this.mockMvc.perform(get("/employees/1"))
@@ -81,16 +94,22 @@ public class EmployeeControllerTest {
 
     @Test
     public void testFindOneEmployee() throws Exception{
+        /*
+        here we mock the service so that it'll return an employeeDTO by faking its existence in the db
+         */
         EmployeeDTO employeeDTO = this.employeeDTO(); //create an employee object
         BDDMockito.given(employeeService.findOne(1L)) // create a mock of the DB(not really a mock, it
                 // intercepts any communication that bounce from the service to the repo, then asks runs it
                 // so here the employee isn't on the db, but it's here
                 .willReturn(Optional.of(employeeDTO)); // tells it what the return will be
+        /*
+        the actual test of the route starts here
+         */
         MvcResult result = this.mockMvc.perform(get("/employees/1")) // now points the correct route
                 .andExpect(status().isOk())
-                .andReturn(); // returns the resulting object
-        System.out.println(result.getResponse().getContentAsString());
-        Gson json = new GsonBuilder().create(); // create a gson to parse into an employeeDTO
+                .andReturn(); // returns the resulting object and store it, so it can be used later
+        Gson json = new GsonBuilder().create(); // create a gson to parse objects into json or vice versa
+        // here we transform the json into a dto
         EmployeeDTO response = json.fromJson(result.getResponse().getContentAsString(), //tell it what to parse
                 EmployeeDTO.class); // and the target class
         Assertions.assertEquals(response.getName(), "jean");
@@ -110,6 +129,7 @@ public class EmployeeControllerTest {
                 EmployeeDTO.class);
 
         response.setName("pierre");
+        // transform the dto into json
         String bodyToSave = json.toJson(response);
         System.out.println(bodyToSave);
         BDDMockito.when(employeeService.save(any(EmployeeDTO.class))) /* when you call the save method with ANY
